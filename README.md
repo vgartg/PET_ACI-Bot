@@ -129,7 +129,3 @@ The [`ci` workflow](.github/workflows/ci.yml) runs on every push and pull reques
 - The shared key is the only authentication factor, so deploy the bot only on hosts you fully control and never commit `.env` files
 - `/turn_off_pc` is gated by `ACI_HOST_ID`; double-check the chat id before exposing the bot
 - The free-form URL prompt rejects anything that is not `http` or `https` to avoid arbitrary protocol handlers
-
-## License
-
-This project is released under the MIT License
