@@ -138,50 +138,101 @@ func isCommand(text string) bool {
 	return strings.HasPrefix(text, "/")
 }
 
+type commandFunc func(*Handler, Message) error
+
+var commands = map[string]commandFunc{
+	"/help":               (*Handler).cmdHelp,
+	"/start":              (*Handler).cmdStart,
+	"/stop":               (*Handler).cmdStop,
+	"/turn_off_pc":        (*Handler).shutdown,
+	"/open_explorer":      (*Handler).cmdOpenExplorer,
+	"/open_google":        (*Handler).cmdOpenGoogle,
+	"/open_steam":         (*Handler).cmdOpenSteam,
+	"/open_discord":       (*Handler).cmdOpenDiscord,
+	"/open_faceit":        (*Handler).openFaceit,
+	"/open_youtube":       (*Handler).cmdOpenYouTube,
+	"/open_vk":            (*Handler).cmdOpenVK,
+	"/open_ya_mus":        (*Handler).cmdOpenYandexMusic,
+	"/open_url":           (*Handler).cmdAwaitURL,
+	"/open_video_by_name": (*Handler).cmdAwaitVideoName,
+	"/close_google":       (*Handler).cmdCloseGoogle,
+	"/close_steam":        (*Handler).cmdCloseSteam,
+	"/close_discord":      (*Handler).cmdCloseDiscord,
+	"/close_faceit":       (*Handler).cmdCloseFaceit,
+}
+
 func (h *Handler) dispatch(msg Message, cmd string) error {
-	switch cmd {
-	case "/help":
-		return h.sender.SendMessage(msg.ChatID, HelpText)
-	case "/stop":
-		h.sessions.Logout(msg.Username)
-		return h.sender.SendMessage(msg.ChatID, sessionEndedText)
-	case "/turn_off_pc":
-		return h.shutdown(msg)
-	case "/open_explorer":
-		return h.openApp(msg, "explorer.exe", "Opened File Explorer")
-	case "/open_google":
-		return h.openApp(msg, h.cfg.Apps.Chrome, "Opened Google Chrome")
-	case "/open_youtube":
-		return h.openURL(msg, "https://www.youtube.com", "Opened YouTube")
-	case "/open_video_by_name":
-		h.sessions.SetState(msg.Username, session.StateWaitVideoName)
-		return h.sender.SendMessage(msg.ChatID, videoPromptText)
-	case "/open_vk":
-		return h.openURL(msg, "https://vk.com/feed", "Opened VKontakte")
-	case "/open_ya_mus":
-		return h.openURL(msg, "https://music.yandex.ru/home", "Opened Yandex Music")
-	case "/open_url":
-		h.sessions.SetState(msg.Username, session.StateWaitURL)
-		return h.sender.SendMessage(msg.ChatID, urlPromptText)
-	case "/open_faceit":
-		return h.openFaceit(msg)
-	case "/open_steam":
-		return h.openApp(msg, h.cfg.Apps.Steam, "Opened Steam")
-	case "/open_discord":
-		return h.openApp(msg, h.cfg.Apps.Discord, "Opened Discord")
-	case "/close_google":
-		return h.closeProcesses(msg, []string{"chrome"}, "Closed Google Chrome")
-	case "/close_faceit":
-		return h.closeProcesses(msg, []string{"faceit", "faceitclient"}, "Closed Faceit")
-	case "/close_steam":
-		return h.closeProcesses(msg, []string{"steam"}, "Closed Steam")
-	case "/close_discord":
-		return h.closeProcesses(msg, []string{"discord"}, "Closed Discord")
-	case "/start":
-		return h.sender.SendMessage(msg.ChatID, welcomeText)
-	default:
-		return h.sender.SendMessage(msg.ChatID, fallbackText)
+	if fn, ok := commands[cmd]; ok {
+		return fn(h, msg)
 	}
+	return h.sender.SendMessage(msg.ChatID, fallbackText)
+}
+
+func (h *Handler) cmdHelp(msg Message) error {
+	return h.sender.SendMessage(msg.ChatID, HelpText)
+}
+
+func (h *Handler) cmdStart(msg Message) error {
+	return h.sender.SendMessage(msg.ChatID, welcomeText)
+}
+
+func (h *Handler) cmdStop(msg Message) error {
+	h.sessions.Logout(msg.Username)
+	return h.sender.SendMessage(msg.ChatID, sessionEndedText)
+}
+
+func (h *Handler) cmdOpenExplorer(msg Message) error {
+	return h.openApp(msg, "explorer.exe", "Opened File Explorer")
+}
+
+func (h *Handler) cmdOpenGoogle(msg Message) error {
+	return h.openApp(msg, h.cfg.Apps.Chrome, "Opened Google Chrome")
+}
+
+func (h *Handler) cmdOpenSteam(msg Message) error {
+	return h.openApp(msg, h.cfg.Apps.Steam, "Opened Steam")
+}
+
+func (h *Handler) cmdOpenDiscord(msg Message) error {
+	return h.openApp(msg, h.cfg.Apps.Discord, "Opened Discord")
+}
+
+func (h *Handler) cmdOpenYouTube(msg Message) error {
+	return h.openURL(msg, "https://www.youtube.com", "Opened YouTube")
+}
+
+func (h *Handler) cmdOpenVK(msg Message) error {
+	return h.openURL(msg, "https://vk.com/feed", "Opened VKontakte")
+}
+
+func (h *Handler) cmdOpenYandexMusic(msg Message) error {
+	return h.openURL(msg, "https://music.yandex.ru/home", "Opened Yandex Music")
+}
+
+func (h *Handler) cmdAwaitURL(msg Message) error {
+	h.sessions.SetState(msg.Username, session.StateWaitURL)
+	return h.sender.SendMessage(msg.ChatID, urlPromptText)
+}
+
+func (h *Handler) cmdAwaitVideoName(msg Message) error {
+	h.sessions.SetState(msg.Username, session.StateWaitVideoName)
+	return h.sender.SendMessage(msg.ChatID, videoPromptText)
+}
+
+func (h *Handler) cmdCloseGoogle(msg Message) error {
+	return h.closeProcesses(msg, []string{"chrome"}, "Closed Google Chrome")
+}
+
+func (h *Handler) cmdCloseSteam(msg Message) error {
+	return h.closeProcesses(msg, []string{"steam"}, "Closed Steam")
+}
+
+func (h *Handler) cmdCloseDiscord(msg Message) error {
+	return h.closeProcesses(msg, []string{"discord"}, "Closed Discord")
+}
+
+func (h *Handler) cmdCloseFaceit(msg Message) error {
+	return h.closeProcesses(msg, []string{"faceit", "faceitclient"}, "Closed Faceit")
 }
 
 func (h *Handler) shutdown(msg Message) error {
