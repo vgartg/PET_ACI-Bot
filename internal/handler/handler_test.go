@@ -53,9 +53,8 @@ func (f *fakeSender) lastText() string {
 }
 
 type call struct {
-	op   string
-	arg  string
-	arg2 string
+	op  string
+	arg string
 }
 
 type fakeExecutor struct {

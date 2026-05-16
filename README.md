@@ -3,6 +3,8 @@
 A Telegram bot that controls a Windows host machine over chat. Authorised users can launch and close common applications, open URLs, search YouTube and shut down the host
 
 ![CI](https://github.com/vgartg/aci-bot/actions/workflows/ci.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vgartg/aci-bot)](https://goreportcard.com/report/github.com/vgartg/aci-bot)
+
 
 ## Features
 
