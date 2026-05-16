@@ -1,0 +1,39 @@
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - gofmt
+    - goimports
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - unconvert
+    - unused
+
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+      - name: var-naming
+      - name: package-comments
+        disabled: true
+      - name: indent-error-flow
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: receiver-naming
+      - name: unused-parameter
+        disabled: true
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - revive
